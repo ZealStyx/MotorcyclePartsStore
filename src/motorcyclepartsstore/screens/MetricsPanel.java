@@ -1,43 +1,38 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
 package motorcyclepartsstore.screens;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import motorcyclepartsstore.service.PredictionService;
 import motorcyclepartsstore.service.PredictionService.Metrics;
 import motorcyclepartsstore.ui.DataTable;
-import motorcyclepartsstore.ui.Forms;
-import motorcyclepartsstore.ui.Theme;
+import motorcyclepartsstore.ui.Styler;
 
-/** Evaluation metrics table plus the three confusion matrices (shared by two instructor pages). */
-public class MetricsPanel extends JPanel {
+/**
+ * Evaluation metrics table plus the three confusion matrices, shared by the Instructor prediction and
+ * evaluation pages. Layout lives in MetricsPanel.form.
+ */
+public class MetricsPanel extends javax.swing.JPanel {
 
-    private final DataTable.ListModel model = new DataTable.ListModel("Metric", "Linear", "Random Forest", "Combined", "Description");
-    private final Matrix[] matrices = {new Matrix("Linear"), new Matrix("Random Forest"), new Matrix("Combined")};
+    private final DataTable.ListModel model =
+            new DataTable.ListModel("Metric", "Linear", "Random Forest", "Combined", "Description");
 
-    public MetricsPanel(String note) {
-        super(new BorderLayout(0, 16));
-        setOpaque(false);
-        DataTable t = new DataTable(model).weights(26, 11, 14, 12, 37);
-        add(t.wrapper(), BorderLayout.NORTH);
-        JPanel south = new JPanel(new BorderLayout(0, 10));
-        south.setOpaque(false);
-        JPanel grid = new JPanel(new GridLayout(1, 3, 20, 0));
-        grid.setOpaque(false);
-        for (Matrix m : matrices) {
-            grid.add(m);
-        }
-        south.add(grid, BorderLayout.NORTH);
-        if (note != null) {
-            south.add(Forms.muted(note, 12), BorderLayout.CENTER);
-        }
-        add(south, BorderLayout.CENTER);
+    /** Creates new form MetricsPanel */
+    public MetricsPanel() {
+        initComponents();
+        Styler.apply(this);
+        metricsTable.bind(model, metricsHost).weights(26, 11, 14, 12, 37);
+    }
+
+    public String getNote() {
+        return noteLabel.getText();
+    }
+
+    public void setNote(String note) {
+        noteLabel.setText(note == null || note.isEmpty() ? " " : note);
     }
 
     public void refresh() {
@@ -57,9 +52,9 @@ public class MetricsPanel extends JPanel {
         rows.add(row("F1 score", m, 7, 3, "Balance of precision and recall"));
         rows.add(row("10-fold CV", m, 8, 3, "Mean R\u00B2 score over 10 folds"));
         model.setRows(rows);
-        for (int i = 0; i < 3; i++) {
-            matrices[i].set(m[i]);
-        }
+        linearMatrix.setMetrics(m[0]);
+        forestMatrix.setMetrics(m[1]);
+        combinedMatrix.setMetrics(m[2]);
     }
 
     private static double value(Metrics x, int k) {
@@ -82,53 +77,68 @@ public class MetricsPanel extends JPanel {
             String.format(f, value(m[2], k)), desc};
     }
 
-    /** One 2x2 confusion matrix. */
-    private static final class Matrix extends JPanel {
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
 
-        private final JLabel[] cells = new JLabel[4];
+        java.awt.GridBagConstraints gridBagConstraints;
 
-        Matrix(String name) {
-            super(new BorderLayout(0, 6));
-            setOpaque(false);
-            add(Forms.muted("Confusion matrix: " + name, 12), BorderLayout.NORTH);
-            JPanel g = new JPanel(new GridLayout(3, 3));
-            g.setOpaque(false);
-            g.add(cell("", false, false));
-            g.add(cell("Pred. slow", false, true));
-            g.add(cell("Pred. fast", false, true));
-            g.add(cell("Actual slow", false, true));
-            cells[0] = cell("-", true, false);
-            cells[1] = cell("-", false, false);
-            g.add(cells[0]);
-            g.add(cells[1]);
-            g.add(cell("Actual fast", false, true));
-            cells[2] = cell("-", false, false);
-            cells[3] = cell("-", true, false);
-            g.add(cells[2]);
-            g.add(cells[3]);
-            cells[0].setToolTipText("True negative (TN)");
-            cells[1].setToolTipText("False positive (FP)");
-            cells[2].setToolTipText("False negative (FN)");
-            cells[3].setToolTipText("True positive (TP)");
-            add(g, BorderLayout.CENTER);
-        }
+        metricsHost = new javax.swing.JPanel();
+        metricsTable = new motorcyclepartsstore.ui.DataTable();
+        matricesRow = new javax.swing.JPanel();
+        linearMatrix = new motorcyclepartsstore.screens.ConfusionMatrix();
+        forestMatrix = new motorcyclepartsstore.screens.ConfusionMatrix();
+        combinedMatrix = new motorcyclepartsstore.screens.ConfusionMatrix();
+        noteLabel = new javax.swing.JLabel();
 
-        private static JLabel cell(String text, boolean tint, boolean header) {
-            JLabel l = new JLabel(text, SwingConstants.CENTER);
-            l.setFont(header ? Theme.bold(12) : Theme.body(14));
-            l.setForeground(header ? Theme.HEADER_TEXT : Theme.INK);
-            l.setOpaque(true);
-            l.setBackground(tint ? Theme.ACCENT_TINT : Color.WHITE);
-            l.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER));
-            l.setPreferredSize(new java.awt.Dimension(70, 40));
-            return l;
-        }
+        metricsHost.setOpaque(false);
+        metricsHost.setLayout(new java.awt.BorderLayout());
+        metricsHost.add(metricsTable, java.awt.BorderLayout.CENTER);
+        linearMatrix.setModelName("Linear");
+        forestMatrix.setModelName("Random Forest");
+        combinedMatrix.setModelName("Combined");
+        matricesRow.setOpaque(false);
+        matricesRow.setLayout(new java.awt.GridLayout(1, 3, 20, 0));
+        matricesRow.add(linearMatrix);
+        matricesRow.add(forestMatrix);
+        matricesRow.add(combinedMatrix);
+        noteLabel.setName("muted");
+        noteLabel.setText(" ");
+        setOpaque(false);
+        setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 16, 0);
+        add(metricsHost, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        add(matricesRow, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(noteLabel, gridBagConstraints);
+    }// </editor-fold>//GEN-END:initComponents
 
-        void set(Metrics m) {
-            cells[0].setText(String.valueOf(m.tn));
-            cells[1].setText(String.valueOf(m.fp));
-            cells[2].setText(String.valueOf(m.fn));
-            cells[3].setText(String.valueOf(m.tp));
-        }
-    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private motorcyclepartsstore.screens.ConfusionMatrix combinedMatrix;
+    private motorcyclepartsstore.screens.ConfusionMatrix forestMatrix;
+    private motorcyclepartsstore.screens.ConfusionMatrix linearMatrix;
+    private javax.swing.JPanel matricesRow;
+    private javax.swing.JPanel metricsHost;
+    private motorcyclepartsstore.ui.DataTable metricsTable;
+    private javax.swing.JLabel noteLabel;
+    // End of variables declaration//GEN-END:variables
 }

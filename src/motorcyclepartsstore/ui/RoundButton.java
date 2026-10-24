@@ -16,6 +16,11 @@ public class RoundButton extends JButton {
 
     private final Kind kind;
 
+    /** Primary (accent) button; also used by the form designer. */
+    public RoundButton() {
+        this("Button", Kind.PRIMARY);
+    }
+
     public RoundButton(String text, Kind kind) {
         super(text);
         this.kind = kind;
@@ -38,8 +43,17 @@ public class RoundButton extends JButton {
 
     @Override
     public Dimension getPreferredSize() {
+        if (isPreferredSizeSet()) {
+            return super.getPreferredSize();
+        }
         FontMetrics fm = getFontMetrics(getFont());
         return new Dimension(fm.stringWidth(getText()) + 40, 42);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        Dimension p = getPreferredSize();
+        return new Dimension(Math.min(p.width, 60), p.height);
     }
 
     @Override

@@ -1,12 +1,17 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
 package motorcyclepartsstore.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -14,126 +19,46 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import motorcyclepartsstore.model.Role;
 
-/** Dark persistent sidebar: brand, role-specific navigation, current role and Log out. */
-public class Sidebar extends JPanel {
+/**
+ * Dark persistent sidebar: brand, role-specific navigation, current role and Log out.
+ * Layout lives in Sidebar.form; the navigation items depend on the role, so they are added here.
+ */
+public class Sidebar extends javax.swing.JPanel {
 
     private final Map<Page, NavItem> items = new HashMap<>();
 
+    /** Creates new form Sidebar */
     public Sidebar(Role role, String fullName, List<Page> pages, Consumer<Page> onSelect, Runnable onLogout) {
-        super(new BorderLayout());
-        setBackground(Theme.SIDEBAR_BG);
-        setPreferredSize(new Dimension(Theme.SIDEBAR_WIDTH, 100));
-
-        add(brand(), BorderLayout.NORTH);
-
-        JPanel nav = new JPanel();
-        nav.setOpaque(false);
-        nav.setLayout(new BoxLayout(nav, BoxLayout.Y_AXIS));
-        nav.setBorder(Forms.pad(6, 15, 0, 15));
+        initComponents();
+        Styler.apply(this);
+        sepLine.setBackground(Theme.SIDEBAR_LINE);
+        avatar.setInitials(role.initials());
+        sideRole.setText(role.getLabel());
+        sideRole.setToolTipText(fullName);
+        logoutLink.setColor(Theme.SIDEBAR_MUTED);
+        logoutLink.setOnClick(onLogout);
+        int row = 0;
         for (Page p : pages) {
             NavItem item = new NavItem(p, () -> onSelect.accept(p));
             items.put(p, item);
-            nav.add(item);
-            nav.add(Box.createVerticalStrut(6));
+            GridBagConstraints c = new GridBagConstraints();
+            c.gridx = 0;
+            c.gridy = row++;
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.weightx = 1;
+            c.insets = new Insets(0, 0, 6, 0);
+            navPanel.add(item, c);
         }
-        add(nav, BorderLayout.CENTER);
-        add(profile(role, fullName, onLogout), BorderLayout.SOUTH);
-    }
-
-    private JComponent brand() {
-        JPanel p = new JPanel(new BorderLayout(10, 0));
-        p.setOpaque(false);
-        p.setBorder(Forms.pad(24, 23, 20, 16));
-        p.add(logoMark(34), BorderLayout.WEST);
-        JLabel name = new JLabel("ONE PROMPT AWAY");
-        name.setFont(Theme.heading(20));
-        name.setForeground(Color.WHITE);
-        p.add(name, BorderLayout.CENTER);
-        return p;
-    }
-
-    /** Rounded accent square with the logo icon. */
-    public static JComponent logoMark(int size) {
-        return new JComponent() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Theme.ACCENT);
-                g2.fillRoundRect(0, 0, size, size, size / 3, size / 3);
-                int ic = size * 6 / 10;
-                g2.translate((size - ic) / 2, (size - ic) / 2);
-                Icons.paint(g2, Icons.Kind.LOGO, ic, Color.WHITE);
-                g2.dispose();
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(size, size);
-            }
-        };
-    }
-
-    private JComponent profile(Role role, String fullName, Runnable onLogout) {
-        JPanel wrap = new JPanel(new BorderLayout());
-        wrap.setOpaque(false);
-        wrap.setBorder(Forms.pad(0, 15, 18, 15));
-        JPanel line = new JPanel();
-        line.setBackground(Theme.SIDEBAR_LINE);
-        line.setPreferredSize(new Dimension(10, 1));
-        wrap.add(line, BorderLayout.NORTH);
-
-        JPanel row = new JPanel(new BorderLayout(12, 0));
-        row.setOpaque(false);
-        row.setBorder(Forms.pad(14, 8, 0, 0));
-        JComponent avatar = new JComponent() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-                g2.setColor(Theme.AVATAR_BG);
-                g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
-                g2.setColor(Color.WHITE);
-                g2.setFont(Theme.bold(13));
-                FontMetrics fm = g2.getFontMetrics();
-                String s = role.initials();
-                g2.drawString(s, (getWidth() - fm.stringWidth(s)) / 2, (getHeight() - fm.getHeight()) / 2 + fm.getAscent());
-                g2.dispose();
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(36, 36);
-            }
-        };
-        JPanel av = new JPanel(new BorderLayout());
-        av.setOpaque(false);
-        av.add(avatar, BorderLayout.NORTH);
-        row.add(av, BorderLayout.WEST);
-
-        JPanel text = new JPanel();
-        text.setOpaque(false);
-        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-        JLabel name = new JLabel(role.getLabel());
-        name.setFont(Theme.body(14));
-        name.setForeground(Theme.SIDEBAR_TEXT);
-        name.setToolTipText(fullName);
-        JLabel out = Forms.link("Log out", Theme.SIDEBAR_MUTED, onLogout);
-        name.setAlignmentX(0f);
-        out.setAlignmentX(0f);
-        text.add(name);
-        text.add(out);
-        row.add(text, BorderLayout.CENTER);
-        wrap.add(row, BorderLayout.CENTER);
-        return wrap;
+        GridBagConstraints filler = new GridBagConstraints();
+        filler.gridy = row;
+        filler.weighty = 1;
+        JPanel f = new JPanel();
+        f.setOpaque(false);
+        navPanel.add(f, filler);
     }
 
     public void select(Page page) {
@@ -142,6 +67,7 @@ public class Sidebar extends JPanel {
         }
     }
 
+    /** One navigation entry, painted by hand (icon + label, accent when selected). */
     private static final class NavItem extends JComponent {
 
         private final Page page;
@@ -151,9 +77,7 @@ public class Sidebar extends JPanel {
         NavItem(Page page, Runnable action) {
             this.page = page;
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
             setPreferredSize(new Dimension(100, 44));
-            setAlignmentX(0f);
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -202,4 +126,96 @@ public class Sidebar extends JPanel {
             g2.dispose();
         }
     }
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        java.awt.GridBagConstraints gridBagConstraints;
+
+        brandPanel = new javax.swing.JPanel();
+        logoMark = new motorcyclepartsstore.ui.LogoMark();
+        brandName = new javax.swing.JLabel();
+        navPanel = new javax.swing.JPanel();
+        profilePanel = new javax.swing.JPanel();
+        sepLine = new javax.swing.JPanel();
+        avatar = new motorcyclepartsstore.ui.Avatar();
+        sideRole = new javax.swing.JLabel();
+        logoutLink = new motorcyclepartsstore.ui.LinkLabel();
+
+        logoMark.setPreferredSize(new java.awt.Dimension(34, 34));
+        brandName.setName("brandName");
+        brandName.setText("ONE PROMPT AWAY");
+        brandPanel.setOpaque(false);
+        brandPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(24, 23, 20, 16));
+        brandPanel.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        brandPanel.add(logoMark, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        brandPanel.add(brandName, gridBagConstraints);
+        navPanel.setOpaque(false);
+        navPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(6, 15, 0, 15));
+        navPanel.setLayout(new java.awt.GridBagLayout());
+        sepLine.setPreferredSize(new java.awt.Dimension(10, 1));
+        avatar.setPreferredSize(new java.awt.Dimension(36, 36));
+        sideRole.setName("sideRole");
+        sideRole.setText("Role");
+        logoutLink.setText("Log out");
+        profilePanel.setOpaque(false);
+        profilePanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 15, 18, 15));
+        profilePanel.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        profilePanel.add(sepLine, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.insets = new java.awt.Insets(14, 8, 0, 12);
+        profilePanel.add(avatar, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(14, 0, 0, 0);
+        profilePanel.add(sideRole, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        profilePanel.add(logoutLink, gridBagConstraints);
+        setName("dark");
+        setPreferredSize(new java.awt.Dimension(228, 100));
+        setLayout(new java.awt.BorderLayout());
+        add(brandPanel, java.awt.BorderLayout.NORTH);
+        add(navPanel, java.awt.BorderLayout.CENTER);
+        add(profilePanel, java.awt.BorderLayout.SOUTH);
+    }// </editor-fold>//GEN-END:initComponents
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private motorcyclepartsstore.ui.Avatar avatar;
+    private javax.swing.JLabel brandName;
+    private javax.swing.JPanel brandPanel;
+    private motorcyclepartsstore.ui.LogoMark logoMark;
+    private motorcyclepartsstore.ui.LinkLabel logoutLink;
+    private javax.swing.JPanel navPanel;
+    private javax.swing.JPanel profilePanel;
+    private javax.swing.JPanel sepLine;
+    private javax.swing.JLabel sideRole;
+    // End of variables declaration//GEN-END:variables
 }

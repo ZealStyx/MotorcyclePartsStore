@@ -17,11 +17,27 @@ public class Chip extends JComponent {
     private String text;
     private Kind kind;
 
+    public Chip() {
+        this("Chip", Kind.GREY);
+    }
+
     public Chip(String text, Kind kind) {
         this.text = text;
         this.kind = kind;
         setFont(Theme.body(12));
         setOpaque(false);
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        set(text, kind);
+    }
+
+    public void setKind(Kind kind) {
+        set(text, kind);
     }
 
     public void set(String text, Kind kind) {

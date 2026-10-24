@@ -5,6 +5,7 @@ import java.awt.CardLayout;
 import java.awt.Window;
 import java.util.EnumMap;
 import java.util.Map;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import motorcyclepartsstore.model.User;
 import motorcyclepartsstore.screens.AdminDashboardPanel;
@@ -12,7 +13,8 @@ import motorcyclepartsstore.screens.EvaluationPanel;
 import motorcyclepartsstore.screens.InstructorDashboardPanel;
 import motorcyclepartsstore.screens.InventoryDashboardPanel;
 import motorcyclepartsstore.screens.InventoryPanel;
-import motorcyclepartsstore.screens.PredictionPanel;
+import motorcyclepartsstore.screens.AdminPredictionPanel;
+import motorcyclepartsstore.screens.InstructorPredictionPanel;
 import motorcyclepartsstore.screens.SalesDashboardPanel;
 import motorcyclepartsstore.screens.SalesTransactionPanel;
 import motorcyclepartsstore.screens.UserManagementPanel;
@@ -26,7 +28,7 @@ public class ShellPanel extends JPanel implements Navigator {
     private final Runnable onLogout;
     private final CardLayout cards = new CardLayout();
     private final JPanel content = new JPanel(cards);
-    private final Map<Page, ScreenPanel> screens = new EnumMap<>(Page.class);
+    private final Map<Page, Screen> screens = new EnumMap<>(Page.class);
     private final Sidebar sidebar;
     private Page current;
 
@@ -47,11 +49,12 @@ public class ShellPanel extends JPanel implements Navigator {
             Dialogs.message(window, "Access denied", "Your user level cannot open that page.");
             return;
         }
-        ScreenPanel s = screens.get(page);
+        Screen s = screens.get(page);
         if (s == null) {
-            s = create(page);
+            JComponent form = create(page);
+            s = (Screen) form;
             screens.put(page, s);
-            content.add(s, page.name());
+            content.add(new ScrollHost(form), page.name());
         }
         current = page;
         cards.show(content, page.name());
@@ -66,13 +69,13 @@ public class ShellPanel extends JPanel implements Navigator {
         }
     }
 
-    private ScreenPanel create(Page page) {
+    private JComponent create(Page page) {
         switch (page) {
             case ADMIN_DASHBOARD: return new AdminDashboardPanel(this);
-            case ADMIN_PREDICTION: return new PredictionPanel(this, false);
+            case ADMIN_PREDICTION: return new AdminPredictionPanel(this);
             case ADMIN_USERS: return new UserManagementPanel(this);
             case INSTRUCTOR_DASHBOARD: return new InstructorDashboardPanel(this);
-            case INSTRUCTOR_PREDICTION: return new PredictionPanel(this, true);
+            case INSTRUCTOR_PREDICTION: return new InstructorPredictionPanel(this);
             case INSTRUCTOR_EVALUATION: return new EvaluationPanel(this);
             case INVENTORY_DASHBOARD: return new InventoryDashboardPanel(this);
             case INVENTORY_LIST: return new InventoryPanel(this);

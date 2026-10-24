@@ -36,6 +36,11 @@ public class DataTable extends JTable {
     private final Map<Integer, Integer> aligns = new HashMap<>();
     private BiConsumer<Integer, Integer> actionHandler;
 
+    /** Empty table for the form designer; call setModel(...) in user code. */
+    public DataTable() {
+        this(new ListModel());
+    }
+
     public DataTable(TableModel model) {
         super(model);
         setRowHeight(42);
@@ -70,6 +75,13 @@ public class DataTable extends JTable {
         };
         addMouseListener(ma);
         addMouseMotionListener(ma);
+    }
+
+    /** Uses the given model and attaches the column header above the table inside {@code host}. */
+    public DataTable bind(ListModel model, javax.swing.JPanel host) {
+        setModel(model);
+        host.add(getTableHeader(), java.awt.BorderLayout.NORTH);
+        return this;
     }
 
     /** Relative column widths. */

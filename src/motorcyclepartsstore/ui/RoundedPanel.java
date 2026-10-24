@@ -14,6 +14,11 @@ public class RoundedPanel extends JPanel {
     private Color fill;
     private Color line;
 
+    /** Standard white card (usable as a bean in the NetBeans form designer). */
+    public RoundedPanel() {
+        this(Theme.CARD_ARC, Theme.CARD_BG, Theme.BORDER);
+    }
+
     public RoundedPanel(int arc, Color fill, Color line) {
         this.arc = arc;
         this.fill = fill;

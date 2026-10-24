@@ -1,45 +1,31 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
 package motorcyclepartsstore.screens;
 
-import java.awt.BorderLayout;
 import java.io.File;
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import motorcyclepartsstore.service.Money;
 import motorcyclepartsstore.service.PredictionService;
 import motorcyclepartsstore.ui.Dialogs;
-import motorcyclepartsstore.ui.LineAreaChart;
 import motorcyclepartsstore.ui.Navigator;
-import motorcyclepartsstore.ui.RoundButton;
-import motorcyclepartsstore.ui.ScreenPanel;
-import motorcyclepartsstore.ui.SummaryCard;
-import motorcyclepartsstore.ui.Theme;
-import motorcyclepartsstore.ui.Chip;
+import motorcyclepartsstore.ui.Screen;
+import motorcyclepartsstore.ui.Styler;
 
-/** Instructor model evaluation (reference page 10): split, metrics, chart, load/save model. */
-public class EvaluationPanel extends ScreenPanel {
+/**
+ * Instructor model evaluation (reference page 10). Layout lives in EvaluationPanel.form.
+ */
+public class EvaluationPanel extends javax.swing.JPanel implements Screen {
 
-    private final SummaryCard split = new SummaryCard("Data split", (Chip) null);
-    private final SummaryCard training = new SummaryCard("Training records", (Chip) null);
-    private final SummaryCard testing = new SummaryCard("Testing records", (Chip) null);
-    private final MetricsPanel metrics = new MetricsPanel("Combined model: average of Simple Linear Regression and Random Forest predictions.");
-    private final LineAreaChart chart = new LineAreaChart();
+    private final Navigator nav;
 
+    /** Creates new form EvaluationPanel */
     public EvaluationPanel(Navigator nav) {
-        this(nav, RoundButton.secondary("Load model"), RoundButton.primary("Save model"));
-    }
-
-    private EvaluationPanel(Navigator nav, RoundButton load, RoundButton saveBtn) {
-        super(nav, "Model evaluation", "Split, training, testing and 10-fold cross validation", false, load, saveBtn);
-        load.addActionListener(e -> loadAndRefresh());
-        saveBtn.addActionListener(e -> save(nav));
-        JPanel body = new JPanel(new BorderLayout(0, Theme.GAP));
-        body.setOpaque(false);
-        body.add(row(Theme.GAP, split, training, testing), BorderLayout.NORTH);
-        body.add(split(titledCard("Evaluation metrics and description", metrics),
-                titledCard("Actual vs predicted", AdminDashboardPanel.chartWithCaption(chart,
-                        "Demo dataset: test split, units per quarter, combined model.")), 0.68), BorderLayout.CENTER);
-        setBody(body);
+        this.nav = nav;
+        initComponents();
+        Styler.apply(this);
     }
 
     private static JFileChooser chooser() {
@@ -49,7 +35,7 @@ public class EvaluationPanel extends ScreenPanel {
         return fc;
     }
 
-    private static void save(Navigator nav) {
+    private void saveModel() {
         PredictionService ps = PredictionService.get();
         if (!ps.isReady()) {
             Dialogs.message(nav.window(), "Save model", "The demo models are still training.");
@@ -76,7 +62,7 @@ public class EvaluationPanel extends ScreenPanel {
         }
     }
 
-    private void loadAndRefresh() {
+    private void loadModel() {
         PredictionService ps = PredictionService.get();
         if (!ps.isReady()) {
             Dialogs.message(nav.window(), "Load model", "The demo models are still training.");
@@ -105,7 +91,170 @@ public class EvaluationPanel extends ScreenPanel {
         split.setValue(ps.splitLabel());
         training.setValue(Money.number(ps.trainingSize()));
         testing.setValue(Money.number(ps.testingSize()));
-        metrics.refresh();
+        metricsPanel.refresh();
         chart.setSeries(ps.getTestSeries());
     }
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        java.awt.GridBagConstraints gridBagConstraints;
+
+        headerPanel = new javax.swing.JPanel();
+        titleBox = new javax.swing.JPanel();
+        pageTitle = new javax.swing.JLabel();
+        pageSubtitle = new javax.swing.JLabel();
+        actionBox = new javax.swing.JPanel();
+        loadBtn = new motorcyclepartsstore.ui.SecondaryButton();
+        saveBtn = new motorcyclepartsstore.ui.RoundButton();
+        body = new javax.swing.JPanel();
+        cardsRow = new javax.swing.JPanel();
+        split = new motorcyclepartsstore.ui.SummaryCard();
+        training = new motorcyclepartsstore.ui.SummaryCard();
+        testing = new motorcyclepartsstore.ui.SummaryCard();
+        midRow = new javax.swing.JPanel();
+        metricsCard = new motorcyclepartsstore.ui.RoundedPanel();
+        metricsTitle = new javax.swing.JLabel();
+        metricsPanel = new motorcyclepartsstore.screens.MetricsPanel();
+        chartCard = new motorcyclepartsstore.ui.RoundedPanel();
+        chartTitle = new javax.swing.JLabel();
+        chart = new motorcyclepartsstore.ui.LineAreaChart();
+        chartCaption = new javax.swing.JLabel();
+
+        pageTitle.setName("pageTitle");
+        pageTitle.setText("Model evaluation");
+        pageSubtitle.setName("pageSubtitle");
+        pageSubtitle.setText("Split, training, testing and 10-fold cross validation");
+        titleBox.setOpaque(false);
+        titleBox.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        titleBox.add(pageTitle, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        titleBox.add(pageSubtitle, gridBagConstraints);
+        loadBtn.setText("Load model");
+        loadBtn.addActionListener(this::loadBtnActionPerformed);
+        saveBtn.setText("Save model");
+        saveBtn.addActionListener(this::saveBtnActionPerformed);
+        actionBox.setOpaque(false);
+        actionBox.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
+        actionBox.add(loadBtn, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
+        actionBox.add(saveBtn, gridBagConstraints);
+        headerPanel.setOpaque(false);
+        headerPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 14, 0));
+        headerPanel.setLayout(new java.awt.BorderLayout());
+        headerPanel.add(titleBox, java.awt.BorderLayout.WEST);
+        headerPanel.add(actionBox, java.awt.BorderLayout.EAST);
+        split.setTitle("Data split");
+        training.setTitle("Training records");
+        testing.setTitle("Testing records");
+        cardsRow.setOpaque(false);
+        cardsRow.setLayout(new java.awt.GridLayout(1, 3, 16, 0));
+        cardsRow.add(split);
+        cardsRow.add(training);
+        cardsRow.add(testing);
+        metricsTitle.setName("cardTitle");
+        metricsTitle.setText("Evaluation metrics and description");
+        metricsPanel.setNote("Combined model: average of Simple Linear Regression and Random Forest predictions.");
+        metricsCard.setBorder(javax.swing.BorderFactory.createEmptyBorder(18, 20, 18, 20));
+        metricsCard.setLayout(new java.awt.BorderLayout());
+        metricsCard.add(metricsTitle, java.awt.BorderLayout.NORTH);
+        metricsCard.add(metricsPanel, java.awt.BorderLayout.CENTER);
+        chartTitle.setName("cardTitle");
+        chartTitle.setText("Actual vs predicted");
+        chartCaption.setName("muted");
+        chartCaption.setText("Demo dataset: test split, units per quarter, combined model.");
+        chartCard.setBorder(javax.swing.BorderFactory.createEmptyBorder(18, 20, 18, 20));
+        chartCard.setLayout(new java.awt.BorderLayout());
+        chartCard.add(chartTitle, java.awt.BorderLayout.NORTH);
+        chartCard.add(chart, java.awt.BorderLayout.CENTER);
+        chartCard.add(chartCaption, java.awt.BorderLayout.SOUTH);
+        midRow.setOpaque(false);
+        midRow.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.68;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 8);
+        midRow.add(metricsCard, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.31999999999999995;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 0);
+        midRow.add(chartCard, gridBagConstraints);
+        body.setOpaque(false);
+        body.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 16, 0);
+        body.add(cardsRow, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        body.add(midRow, gridBagConstraints);
+        setOpaque(false);
+        setBorder(javax.swing.BorderFactory.createEmptyBorder(28, 34, 28, 34));
+        setLayout(new java.awt.BorderLayout());
+        add(headerPanel, java.awt.BorderLayout.NORTH);
+        add(body, java.awt.BorderLayout.CENTER);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void loadBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadBtnActionPerformed
+        loadModel();
+    }//GEN-LAST:event_loadBtnActionPerformed
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        saveModel();
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel actionBox;
+    private javax.swing.JPanel body;
+    private javax.swing.JPanel cardsRow;
+    private motorcyclepartsstore.ui.LineAreaChart chart;
+    private javax.swing.JLabel chartCaption;
+    private motorcyclepartsstore.ui.RoundedPanel chartCard;
+    private javax.swing.JLabel chartTitle;
+    private javax.swing.JPanel headerPanel;
+    private motorcyclepartsstore.ui.SecondaryButton loadBtn;
+    private motorcyclepartsstore.ui.RoundedPanel metricsCard;
+    private motorcyclepartsstore.screens.MetricsPanel metricsPanel;
+    private javax.swing.JLabel metricsTitle;
+    private javax.swing.JPanel midRow;
+    private javax.swing.JLabel pageSubtitle;
+    private javax.swing.JLabel pageTitle;
+    private motorcyclepartsstore.ui.RoundButton saveBtn;
+    private motorcyclepartsstore.ui.SummaryCard split;
+    private motorcyclepartsstore.ui.SummaryCard testing;
+    private javax.swing.JPanel titleBox;
+    private motorcyclepartsstore.ui.SummaryCard training;
+    // End of variables declaration//GEN-END:variables
 }
