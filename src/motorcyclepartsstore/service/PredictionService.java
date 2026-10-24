@@ -2,8 +2,11 @@ package motorcyclepartsstore.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -33,9 +36,10 @@ import weka.core.Instances;
 /**
  * Demand prediction using the Weka library that is already part of the project.
  *
- * The data is a deterministic, synthetic weekly sales dataset generated from {@link DemoCatalog}; it is
- * NOT real shop data. The models (Simple Linear Regression and Random Forest) are genuinely trained on
- * it with Weka, evaluated on a held-out test split and with manual 10-fold cross-validation.
+ * The data is a synthetic weekly sales CSV bundled in the datasets/ folder, with a deterministic
+ * generated fallback if that file is missing or invalid. It is NOT real shop data. The models
+ * (Simple Linear Regression and Random Forest) are trained with Weka and evaluated on a held-out
+ * test split and with manual 10-fold cross-validation.
  * The combined model is the average of the two predictions.
  */
 public final class PredictionService {
@@ -179,6 +183,101 @@ public final class PredictionService {
     // ------------------------------------------------------------------ dataset
 
     private void buildDataset() {
+        rows = new ArrayList<>();
+        if (!loadWeeklySalesCsv(new File("datasets/weekly_sales.csv"))) {
+            buildGeneratedFallbackDataset();
+        }
+        // Per-product weekly means define the Best selling / Slow moving cut-offs.
+        double[] means = new double[DemoCatalog.size()];
+        for (DatasetRow r : rows) {
+            means[r.productId] += r.qtySold / (double) WEEKS;
+        }
+        Arrays.sort(means);
+        loWeekly = means[(int) Math.floor((means.length - 1) * 0.33)];
+        hiWeekly = means[(int) Math.ceil((means.length - 1) * 0.67)];
+    }
+
+    /** Loads the bundled CSV only when it has the full, expected product/week matrix. */
+    private boolean loadWeeklySalesCsv(File file) {
+        if (!file.isFile()) {
+            return false;
+        }
+        List<DatasetRow> loaded = new ArrayList<>();
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            String header = reader.readLine();
+            if (header == null || !header.replace("\uFEFF", "").trim().equals(
+                    "date,product_id,sku,product,category,qty_sold,unit_price,stock,week_index,week_of_year")) {
+                return false;
+            }
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                String[] f = line.split(",", -1);
+                if (f.length != 10) {
+                    return false;
+                }
+                int id = Integer.parseInt(f[1].trim());
+                if (id < 0 || id >= DemoCatalog.size()) {
+                    return false;
+                }
+                if (!f[2].equals(String.valueOf(DemoCatalog.ITEMS[id][0]))
+                        || !f[3].equals(DemoCatalog.name(id))
+                        || !f[4].equals(DemoCatalog.category(id))) {
+                    return false;
+                }
+                LocalDate date = LocalDate.parse(f[0].trim());
+                int qty = Integer.parseInt(f[5].trim());
+                double price = Double.parseDouble(f[6].trim());
+                int stock = Integer.parseInt(f[7].trim());
+                int weekIndex = Integer.parseInt(f[8].trim());
+                int weekOfYear = Integer.parseInt(f[9].trim());
+                if (qty < 0 || price < 0 || stock < 0 || weekIndex < 0 || weekIndex >= WEEKS
+                        || weekOfYear < 1 || weekOfYear > 52) {
+                    return false;
+                }
+                loaded.add(new DatasetRow(date, id, f[3], f[4], qty, price, stock, weekIndex, weekOfYear));
+            }
+            if (loaded.size() != WEEKS * DemoCatalog.size()) {
+                return false;
+            }
+            loaded.sort((a, b) -> {
+                int dateOrder = a.date.compareTo(b.date);
+                return dateOrder != 0 ? dateOrder : Integer.compare(a.productId, b.productId);
+            });
+            LocalDate firstDate = loaded.get(0).date;
+            LocalDate latestDate = loaded.get(loaded.size() - 1).date;
+            if (firstDate.getDayOfWeek() != DayOfWeek.MONDAY
+                    || latestDate.getDayOfWeek() != DayOfWeek.MONDAY
+                    || !latestDate.minusWeeks(WEEKS - 1).equals(firstDate)) {
+                return false;
+            }
+            // Confirm every week has one row for every product and no duplicate product/week pair.
+            boolean[][] seen = new boolean[WEEKS][DemoCatalog.size()];
+            for (DatasetRow r : loaded) {
+                if (seen[r.weekIndex][r.productId]) {
+                    return false;
+                }
+                seen[r.weekIndex][r.productId] = true;
+            }
+            for (boolean[] week : seen) {
+                for (boolean productSeen : week) {
+                    if (!productSeen) {
+                        return false;
+                    }
+                }
+            }
+            rows = loaded;
+            lastMonday = latestDate;
+            return true;
+        } catch (IOException | RuntimeException ex) {
+            return false;
+        }
+    }
+
+    /** Deterministic fallback keeps predictions working if the bundled CSV is unavailable. */
+    private void buildGeneratedFallbackDataset() {
         lastMonday = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         Random rnd = new Random(2026);
         rows = new ArrayList<>();
@@ -196,14 +295,6 @@ public final class PredictionService {
                         5 + rnd.nextInt(80), w, woy));
             }
         }
-        // Per-product weekly means define the Best selling / Slow moving cut-offs.
-        double[] means = new double[DemoCatalog.size()];
-        for (DatasetRow r : rows) {
-            means[r.productId] += r.qtySold / (double) WEEKS;
-        }
-        Arrays.sort(means);
-        loWeekly = means[(int) Math.floor((means.length - 1) * 0.33)];
-        hiWeekly = means[(int) Math.ceil((means.length - 1) * 0.67)];
     }
 
     private Instances newHeader() {

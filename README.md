@@ -37,3 +37,8 @@ Custom beans used in the palette-less designer: RoundedPanel, RoundButton/Second
 SummaryCard, DataTable, LineAreaChart, HBarChart, DonutChart, LinkLabel, LogoMark, Avatar.
 Kept as plain code on purpose: AppFrame/ShellPanel (window + page switching), ModalDialog (dialog chrome),
 Dialogs, PredictionController and the custom-painted components.
+
+
+## CSV datasets
+
+The `datasets/` directory contains four synthetic CSV datasets for classroom use: `weekly_sales.csv` (1,248 records), `sales_transactions.csv` (1,500 records), `sales_items.csv` (4,492 records), and `inventory_snapshots.csv` (1,500 records). `PredictionService` loads `datasets/weekly_sales.csv` for model training when the full 104-week product matrix is present; otherwise, it falls back to generated demo data. The transaction and inventory CSVs are included for analysis/import exercises and do not populate the app's in-memory transaction or inventory screens automatically. See `datasets/README.md` for field descriptions. All records are synthetic, not real shop data.
